@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WiFi QR login</title>
+
+    <style>
+      body {
+        font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
+          "Helvetica Neue", sans-serif;
+      }
+
+      .content-container {
+        height: 100%;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+      }
+
+      .content {
+        max-width: 500px;
+        width: 100%;
+      }
+
+      input[type="text"] {
+        padding: 0.85em 1em;
+        border-radius: 0.25em;
+        border: 1px solid #bfbfbf;
+      }
+
+      button {
+        padding: 1em 1.5em;
+        border: 1px solid #d6d6d6;
+        background-color: #ebebeb;
+        border-radius: 0.25em;
+      }
+
+      .qr {
+        border-radius: 0.25em;
+        border: 1px solid #bfbfbf;
+        height: 200px;
+        width: 200px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .qr > img {
+        padding: 10px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="content-container">
+      <div class="content">
+        <h1>WiFi login QR code generator</h1>
+
+        <div
+          style="
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            gap: 20px;
+          "
+        >
+          <div class="qr" id="qr"></div>
+
+          <div
+            style="
+              width: 250px;
+              display: flex;
+              flex-direction: column;
+              justify-content: space-between;
+            "
+          >
+            <div
+              style="
+                display: flex;
+                flex-direction: column;
+                gap: 0.5em;
+                justify-content: flex-start;
+              "
+            >
+              <div style="display: flex; flex-direction: column">
+                <label for="ssid">SSID / WiFi name</label>
+                <input
+                  type="text"
+                  autocomplete="off"
+                  autocapitalize="off"
+                  name="SSID / wifi name"
+                  id="ssid"
+                />
+              </div>
+
+              <div style="display: flex; flex-direction: column">
+                <label for="password">Password</label>
+                <input
+                  type="text"
+                  autocomplete="off"
+                  autocapitalize="off"
+                  name="password"
+                  id="password"
+                />
+              </div>
+            </div>
+
+            <button onclick="generateCode()">Generate</button>
+          </div>
+          <span id="error"></span>
+        </div>
+      </div>
+    </div>
+
+    <script src="./bwip-js-min.js"></script>
+    <script>
+      const ssidEl = document.getElementById("ssid");
+      const passwordEl = document.getElementById("password");
+      const qrEl = document.getElementById("qr");
+      const errorEl = document.getElementById("error");
+
+      const createFormat = (ssid, pass) =>
+        `WIFI:T:WPA;S:${ssid};P:${pass};H:;;`;
+
+      const generateCode = () => {
+        if (ssidEl.value === "" || passwordEl.value === "") {
+          return;
+        }
+
+        const canvas = document.createElement("canvas");
+
+        try {
+          bwipjs.toCanvas(canvas, {
+            bcid: "qrcode",
+            text: createFormat(ssidEl.value, passwordEl.value),
+            scale: 1,
+            includetext: false,
+            height: 65,
+            width: 65,
+            padding: 5,
+          });
+
+          const img = document.createElement("img");
+          img.src = canvas.toDataURL("image/png");
+          qrEl.innerHTML = null;
+          qrEl.appendChild(img);
+        } catch (e) {
+          errorEl.innerText = `Error creating code: ${e.message}`;
+        }
+      };
+    </script>
+  </body>
+</html>
